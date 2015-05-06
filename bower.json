@@ -1,0 +1,21 @@
+{
+  "name": "lifeboard",
+  "main": "lifeboard.js",
+  "version": "0.0.0",
+  "authors": [
+    "Ben Joldersma <ben@scout.com>"
+  ],
+  "description": "A life board",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "masonry": "~3.3.0",
+    "react": "~0.13.2"
+  }
+}
