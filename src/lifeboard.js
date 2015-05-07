@@ -11,8 +11,7 @@ var DataStore = {
   deserializeAspects: function(rawAspects) {
     var self = this;
     return rawAspects.map(function(rawAspect) {
-      var aspect = new Aspect(rawAspect.title, rawAspect.comment, rawAspect.importance,
-                             rawAspect.health);
+      var aspect = new Aspect(rawAspect);
       aspect.aspects = self.deserializeAspects(rawAspect.aspects);
       return aspect;
     });
@@ -23,12 +22,14 @@ var DataStore = {
   }
 }
 
-function Aspect(title, comment, importance, health)
+function Aspect(raw)
 {
-  this.title = title;
-  this.comment = comment;
-  this.importance = importance || 0;
-  this.health = health || 5;
+  raw = raw || {};
+  this.title = raw.title;
+  this.comment = raw.comment;
+  this.importance = raw.importance || 1;
+  this.concern = raw.concern || 1;
+  this.deleted = raw.deleted || false;
   this.aspects = [];
 };
 
@@ -58,14 +59,25 @@ var AspectView = React.createClass({
     this.setState({editing: !this.state.editing});
   },
 
+  delete: function() {
+    this.props.aspect.deleted = !this.props.aspect.deleted;
+    this.props.onChange(this.props.aspect);
+  },
+
+  maybeToggle: function(evt) {
+    if (evt.keyCode == 13 && evt.ctrlKey) {
+      this.toggle();
+    }
+  },
+
   render: function() {
     var aspect = this.props.aspect;
     var classes = ['aspect'];
     classes.push('importance-' + aspect.importance);
-    classes.push('health-' + aspect.health);
+    classes.push('concern-' + aspect.concern);
     
     if (this.state.editing) {
-      return <div className={classes.join(' ')}>
+      return <div className={classes.join(' ')} onKeyUp={this.maybeToggle}>
         <header>
           <i className="fa fa-eye" onClick={this.toggle}></i>
         </header>
@@ -78,20 +90,19 @@ var AspectView = React.createClass({
         <label>Importance:
         <input type="range" className="importance" min="1" max="5" value={aspect.importance} onChange={this.change}/>
         </label>
-        <label>Health:
-        <input type="range" className="health" min="1" max="5" value={aspect.health} onChange={this.change}/>
+        <label>Concern:
+        <input type="range" className="concern" min="1" max="5" value={aspect.concern} onChange={this.change}/>
         </label>
       </div>;
     } else {
-      return <div className={classes.join(' ')}>
+      return <div className={classes.join(' ')} onDoubleClick={this.zoom}>
         <header>
-          {aspect.title}
+          {aspect.title} ({aspect.aspects.length})
+          <i className="fa fa-search-plus" onClick={this.zoom}></i> 
           <i className="fa fa-pencil-square-o" onClick={this.toggle}></i>
+          <i className="fa fa-trash" onClick={this.delete}></i>
         </header>
         <p>{aspect.comment}</p>
-        {aspect.aspects.length ?
-        <button onClick={this.zoom}>Zoom</button> 
-        : null }
       </div>;
     }
   }
@@ -142,7 +153,17 @@ var AspectList = React.createClass({
   },
 
   pack: function() {
-    new Packery(this.getDOMNode());
+    new Packery(document.querySelector('.aspect-list'));
+  },
+
+  filter: function(aspect) {
+    return this.state.showDeleted || !aspect.deleted;
+  },
+
+  keyUp: function(evt) {
+    if (evt.keyCode == 78 && evt.altKey) {
+      this.newAspect();
+    }
   },
 
   render: function() {
@@ -150,15 +171,18 @@ var AspectList = React.createClass({
       return null;
     }
     var self = this;
-    var aspectListView = this.state.aspects.map(function(aspect) {
+    var filtered = this.state.aspects.filter(this.filter);
+    var aspectListView = filtered.map(function(aspect) {
       return <AspectView aspect={aspect} onZoom={self.zoomIn} onChange={self.update}/>;
     });
-    return <div className="aspect-list">
+    return <div onKeyUp={this.keyUp}>
+      <i className="fa fa-plus-circle" onClick={this.newAspect}/>
       {this.state.path.length ? 
-      <button onClick={this.zoomOut}>Zoom Out</button> 
+      <i className="fa fa-search-minus" onClick={this.zoomOut}></i> 
       : null}
-      {aspectListView}
-      <i className="fa fa-plus-square" onClick={this.newAspect}/>
+      <div className="aspect-list">
+        {aspectListView}
+      </div>
     </div>;
   }
 });

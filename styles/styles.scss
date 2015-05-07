@@ -6,11 +6,18 @@ body {
   width: 100px;
   height: 100px;
   display: block;
-  border: 1px solid black;
+  border: 1px solid #ccc;
+  box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
   padding: 5px;
-  margin: 10px;
+  margin: 5px;
   overflow-x: hidden;
   overflow-y: auto;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 
   header {
     line-height: 12px;
@@ -22,8 +29,15 @@ body {
     font-size: 12px;
     i {
       float: right;
-    }
+      visibility: hidden;
+      padding: 2px;
+      line-height: 10px;
+    }    
   }
+
+  &:hover header i {
+      visibility: visible;
+    }
 
   p {
     line-height: 16px;
@@ -54,4 +68,24 @@ body {
 .importance-5 {
   width: 300px;
   height: 300px;
+}
+
+.concern-5 {
+  background: #FF8686;
+}
+
+.concern-4 {
+  background: #FFDA96;
+}
+
+.concern-3 {
+  background: #FFFFA5;
+}
+
+.concern-2 {
+  background: #DBFF9E;
+}
+
+.concern-1 {
+  background: #71E471;
 }
